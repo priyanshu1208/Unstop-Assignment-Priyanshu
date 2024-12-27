@@ -1,8 +1,11 @@
-#
+
 
 mincost = float('inf')
 best = []
 
+#  Algorithm for Minimizing the travel time across the horizontal and vertical
+#  Used a recursive method for calculation
+#  Here the logic is basically if the number of rooms required in any floor then it allots and if not then it used the recursive function to calculate the minimum cost or total travel time
 def func(floor, rooms, arr, cost, booked_rooms, begin):
     global mincost, best
     if floor == len(arr) or rooms == 0:
@@ -31,6 +34,7 @@ def func(floor, rooms, arr, cost, booked_rooms, begin):
             rooms += empty_rooms
     for _ in range(empty_rooms):
         booked_rooms.pop()
+
 
 def book_rooms(rooms, room_positions, num_rooms):
     global mincost, best
