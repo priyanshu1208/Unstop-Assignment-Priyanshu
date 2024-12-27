@@ -147,5 +147,37 @@ def generate_random_booking():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+@app.route('/toggle_room', methods=['POST'])
+def toggle_room_status():
+    try:
+        data = request.get_json()
+        room_number = data.get('room_number')
+
+        if not room_number:
+            return jsonify({"message": "Room number is required."}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Fetch the current availability of the room
+        cursor.execute('SELECT available FROM rooms WHERE room_number = ?', (room_number,))
+        room = cursor.fetchone()
+
+        if not room:
+            return jsonify({"message": "Room not found."}), 404
+
+        current_status = room['available']
+        new_status = 1 if current_status == 0 else 0  # Toggle the status
+
+        # Update the room availability
+        cursor.execute('UPDATE rooms SET available = ? WHERE room_number = ?', (new_status, room_number))
+        conn.commit()
+        conn.close()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
