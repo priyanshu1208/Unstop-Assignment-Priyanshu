@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Booking System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav>
+        <h1> Unstop</h1>
+    </nav>
+
+    <div class="container">
+        <h1>Room Booking System</h1>
+        <div class="input-container">
+            <label for="numRooms">Enter Number of Rooms:</label>
+            <input type="number" id="numRooms" min="1" max="5" placeholder="Enter a number (1-5)">
+            <div>
+                <button onclick="bookRoom()">Book Rooms</button>
+                <button onclick="resetRooms()">Reset Rooms</button>
+                <button onclick="generateRandom()">Random Availability</button>
+            </div>
+        </div>
+        <div id="roomMatrix"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+
