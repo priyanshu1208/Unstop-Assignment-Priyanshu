@@ -23,7 +23,6 @@ function loadRooms() {
         .catch(error => console.error('Error loading rooms:', error));
 }
 
-
 function bookRoom() {
     const numRooms = parseInt(document.getElementById('numRooms').value);
     if (isNaN(numRooms) || numRooms < 1 || numRooms > 5) {
@@ -31,25 +30,34 @@ function bookRoom() {
         return;
     }
 
-    // Send only the number of rooms to be booked
     fetch('/book', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ num_rooms: numRooms })
     })
     .then(response => response.json())
     .then(data => {
         if (data.booked_rooms) {
             alert(`${numRooms} room(s) booked successfully!`);
-            loadRooms(); // Reload room data after booking
+            updateBookedRoomsList(data.booked_rooms);
+            loadRooms(); // Reload the room matrix
         } else {
             alert('Error: ' + data.message);
         }
     })
     .catch(error => console.error('Error booking room:', error));
 }
+
+function updateBookedRoomsList(bookedRooms) {
+    const bookedRoomsList = document.getElementById('bookedRoomsList');
+    if (bookedRooms.length > 0) {
+        bookedRoomsList.textContent = `Booked Rooms: ${bookedRooms.join(', ')}`;
+    } else {
+        bookedRoomsList.textContent = "No rooms booked yet.";
+    }
+}
+
+window.onload = loadRooms;
 
 
 
