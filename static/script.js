@@ -44,6 +44,38 @@ function toggleRoomStatus(roomNumber) {
 window.onload = loadRooms;
 
 
+function updateBookedRoomsList(bookedRooms) {
+    const bookedRoomsList = document.getElementById('bookedRoomsList');
+    if (bookedRooms.length > 0) {
+        bookedRoomsList.textContent = `Booked Rooms: ${bookedRooms.join(', ')}`;
+    } else {
+        bookedRoomsList.textContent = "No rooms booked yet.";
+    }
+}
+
+
+
+
+function resetRooms() {
+    fetch('/reset', {
+        method: 'POST', 
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        alert(data.message);
+        loadRooms(); 
+
+        
+        const bookedRoomsList = document.getElementById('bookedRoomsList');
+        bookedRoomsList.textContent = ''; 
+    })
+    .catch((error) => console.error('Error resetting rooms:', error));
+}
+
+
 function bookRoom() {
     const numRooms = parseInt(document.getElementById('numRooms').value);
     if (isNaN(numRooms) || numRooms < 1 || numRooms > 5) {
@@ -69,39 +101,6 @@ function bookRoom() {
     .catch(error => console.error('Error booking room:', error));
 }
 
-function updateBookedRoomsList(bookedRooms) {
-    const bookedRoomsList = document.getElementById('bookedRoomsList');
-    if (bookedRooms.length > 0) {
-        bookedRoomsList.textContent = `Booked Rooms: ${bookedRooms.join(', ')}`;
-    } else {
-        bookedRoomsList.textContent = "No rooms booked yet.";
-    }
-}
-
-window.onload = loadRooms;
-
-
-
-function resetRooms() {
-    fetch('/reset', {
-        method: 'POST', 
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        alert(data.message);
-        loadRooms(); 
-
-        
-        const bookedRoomsList = document.getElementById('bookedRoomsList');
-        bookedRoomsList.textContent = ''; 
-    })
-    .catch((error) => console.error('Error resetting rooms:', error));
-}
-
-
 function generateRandom() {
     const numRooms = parseInt(document.getElementById('numRooms').value);
     if (isNaN(numRooms) || numRooms < 1 || numRooms > 5) {
@@ -120,6 +119,7 @@ function generateRandom() {
     .then(data => {
         if (data.booked_rooms) {
             alert(`${numRooms} room(s) booked successfully!`);
+            updateBookedRoomsList(data.booked_rooms);
             loadRooms(); 
         } else {
             alert('Error: ' + data.message);

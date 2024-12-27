@@ -75,13 +75,14 @@ def book_room():
 
         # Call the book_rooms function to handle booking
         booked_rooms = book_rooms(rooms, room_positions, num_rooms)
-        print(booked_rooms)
         # Update the rooms' availability in the database
         for room_number in booked_rooms:
             cursor.execute('UPDATE rooms SET available = 1 WHERE room_number = ?',(room_number,))
 
         conn.commit()
         conn.close()
+
+        print(booked_rooms)
 
         return jsonify({"booked_rooms": booked_rooms})
 
@@ -141,7 +142,8 @@ def generate_random_booking():
         conn.close()
 
         # Return the booked rooms information
-        booked_rooms = [{'floor': room[0], 'room_number': room[1]} for room in selected_rooms]
+        booked_rooms = [ room[1] for room in selected_rooms]
+        print(booked_rooms)
         return jsonify({"booked_rooms": booked_rooms})
 
     except Exception as e:
