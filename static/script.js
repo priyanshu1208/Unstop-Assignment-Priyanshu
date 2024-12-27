@@ -14,8 +14,6 @@ function loadRooms() {
                     roomDiv.classList.add('room');
                     roomDiv.classList.add(available === 0 ? 'available' : 'booked');
                     roomDiv.textContent = roomPositions[floor][index];
-
-                    // Add click event listener for toggling the room's status
                     roomDiv.addEventListener('click', () => toggleRoomStatus(roomPositions[floor][index]));
 
                     roomsContainer.appendChild(roomDiv);
@@ -26,7 +24,7 @@ function loadRooms() {
 }
 
 function toggleRoomStatus(roomNumber) {
-    // Fetch the current status of the room and toggle it
+    
     fetch('/toggle_room', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -35,7 +33,7 @@ function toggleRoomStatus(roomNumber) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            loadRooms(); // Reload the room matrix after toggling
+            loadRooms(); 
         } else {
             alert('Error: ' + data.message);
         }
@@ -63,7 +61,7 @@ function bookRoom() {
         if (data.booked_rooms) {
             alert(`${numRooms} room(s) booked successfully!`);
             updateBookedRoomsList(data.booked_rooms);
-            loadRooms(); // Reload the room matrix
+            loadRooms(); 
         } else {
             alert('Error: ' + data.message);
         }
@@ -86,7 +84,7 @@ window.onload = loadRooms;
 
 function resetRooms() {
     fetch('/reset', {
-        method: 'POST', // Ensure this matches the backend method
+        method: 'POST', 
         headers: {
             'Content-Type': 'application/json',
         },
@@ -94,17 +92,16 @@ function resetRooms() {
     .then((response) => response.json())
     .then((data) => {
         alert(data.message);
-        loadRooms(); // Reload room data after resetting
+        loadRooms(); 
 
-        // Clear the "Booked Rooms" list (empty the container)
+        
         const bookedRoomsList = document.getElementById('bookedRoomsList');
-        bookedRoomsList.textContent = ''; // This clears the content of the booked rooms list
+        bookedRoomsList.textContent = ''; 
     })
     .catch((error) => console.error('Error resetting rooms:', error));
 }
 
 
-// Generate random availability
 function generateRandom() {
     const numRooms = parseInt(document.getElementById('numRooms').value);
     if (isNaN(numRooms) || numRooms < 1 || numRooms > 5) {
@@ -113,17 +110,17 @@ function generateRandom() {
     }
 
     fetch('/random', {
-        method: 'POST',  // Ensure POST method
+        method: 'POST', 
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ num_rooms: numRooms })  // Send num_rooms as payload
+        body: JSON.stringify({ num_rooms: numRooms })  
     })
     .then(response => response.json())
     .then(data => {
         if (data.booked_rooms) {
             alert(`${numRooms} room(s) booked successfully!`);
-            loadRooms(); // Reload room data after booking
+            loadRooms(); 
         } else {
             alert('Error: ' + data.message);
         }
@@ -131,6 +128,4 @@ function generateRandom() {
     .catch(error => console.error('Error generating random availability:', error));
 }
 
-
-// Initial load
 window.onload = loadRooms;
