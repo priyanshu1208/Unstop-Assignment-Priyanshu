@@ -92,11 +92,34 @@ def book_room():
     except Exception as e:
         return jsonify({"message": "An error occurred while booking the room."}), 500
 
+        
+@app.route('/getRoomStatus', methods=['GET'])
+def getRoomStatus():
+
+    room_number = request.args.get('room_number')
+    print(room_number)
+
+    if not room_number:
+        return jsonify({"message": "Room number is required."}), 400
+    
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT available FROM rooms WHERE room_number = ?', (room_number,))
+    room = cursor.fetchone()
+
+    if room is None:
+        return jsonify({"message": "Room not found."}), 404
+
+    current_status = room[0]  
+    return jsonify({"current_status": current_status})
+
 #  Reset function
 @app.route('/reset', methods=['POST'])
 def reset_rooms():
     try:
-        print("hello")
+       
         conn = get_db_connection()
         cursor = conn.cursor()
         

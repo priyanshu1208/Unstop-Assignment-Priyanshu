@@ -38,24 +38,74 @@ function debounce(func, delay) {
     };
 }
 
-// This is used for changing the room status
-function toggleRoomStatus(roomNumber) {
-    fetch('/toggle_room', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room_number: roomNumber }),
+function roomStatus(roomNumber) {
+
+
+
+    return fetch(`/getRoomStatus?room_number=${roomNumber}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
         .then((response) => response.json())
         .then((data) => {
-            if (data.success) {
-                loadRooms();
+
+            if (data.current_status == 1) {
+                return 1;
             } else {
-                alert('Error: ' + data.message);
+                return 0;
             }
         })
-        .catch((error) => console.error('Error changing room status:', error));
+        .catch((error) => {
+            console.error("Error fetching room status:", error);
+            return 0;
+        });
 }
 
+
+async function toggleRoomStatus(roomNumber) {
+    const status = await roomStatus(roomNumber);
+
+
+    if (status === 1) {
+        const confirmUnbook = confirm(`Are you sure you want to unbook Room ${roomNumber}?`);
+        if (confirmUnbook) {
+            fetch('/toggle_room', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ room_number: roomNumber }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        loadRooms();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch((error) => console.error('Error changing room status:', error));
+        } else {
+            console.log(`Room ${roomNumber} booking was not changed.`);
+        }
+    } else {
+
+        fetch('/toggle_room', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room_number: roomNumber }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    loadRooms();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch((error) => console.error('Error changing room status:', error));
+    }
+}
 // Event listener with debounce applied
 function addRoomClickListener(roomDiv, roomNumber) {
     roomDiv.addEventListener(
@@ -81,21 +131,21 @@ function updateBookedRoomsList(bookedRooms) {
 // This function is used for resetting the room matrix
 function resetRooms() {
     fetch('/reset', {
-        method: 'POST', 
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
     })
-    .then((response) => response.json())
-    .then((data) => {
-        alert(data.message);
-        loadRooms(); 
+        .then((response) => response.json())
+        .then((data) => {
+            alert(data.message);
+            loadRooms();
 
-        
-        const bookedRoomsList = document.getElementById('bookedRoomsList');
-        bookedRoomsList.textContent = ''; 
-    })
-    .catch((error) => console.error('Error resetting rooms:', error));
+
+            const bookedRoomsList = document.getElementById('bookedRoomsList');
+            bookedRoomsList.textContent = '';
+        })
+        .catch((error) => console.error('Error resetting rooms:', error));
 }
 
 //  This is the important function for booking the rooms with the algorithm
@@ -114,18 +164,18 @@ function bookRoom() {
     })
 
 
-    .then(response => response.json())
-    .then(data => {
-        if (data.booked_rooms) {
-            alert(`${numRooms} room(s) booked successfully!`);
+        .then(response => response.json())
+        .then(data => {
+            if (data.booked_rooms) {
+                alert(`${numRooms} room(s) booked successfully!`);
 
-            updateBookedRoomsList(data.booked_rooms);
-            loadRooms(); 
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => console.error('Error booking room:', error));
+                updateBookedRoomsList(data.booked_rooms);
+                loadRooms();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error booking room:', error));
 }
 
 
@@ -138,23 +188,23 @@ function generateRandom() {
     }
 
     fetch('/random', {
-        method: 'POST', 
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ num_rooms: numRooms })  
+        body: JSON.stringify({ num_rooms: numRooms })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.booked_rooms) {
-            alert(`${numRooms} rooms booked successfully`);
-            updateBookedRoomsList(data.booked_rooms);
-            loadRooms(); 
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => console.error('Error generating random feature:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.booked_rooms) {
+                alert(`${numRooms} rooms booked successfully`);
+                updateBookedRoomsList(data.booked_rooms);
+                loadRooms();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error generating random feature:', error));
 }
 
 window.onload = loadRooms;
