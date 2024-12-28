@@ -1,7 +1,6 @@
 // It is used for loading the rooms in the frontend which are booked or available
 function loadRooms() {
     const roomsContainer = document.getElementById('roomMatrix');
-    roomsContainer.innerHTML = '';
 
     fetch('/status')
         .then(response => response.json())
@@ -11,42 +10,61 @@ function loadRooms() {
 
             for (const floor in rooms) {
                 rooms[floor].forEach((available, index) => {
-                    const roomDiv = document.createElement('div');
-                    roomDiv.classList.add('room');
-                    roomDiv.classList.add(available === 0 ? 'available' : 'booked');
+                    const roomId = `room-${floor}-${index}`;
+                    let roomDiv = document.getElementById(roomId);
 
-                    roomDiv.textContent = roomPositions[floor][index];
-                    roomDiv.addEventListener('click', () => toggleRoomStatus(roomPositions[floor][index]));
+                    if (!roomDiv) {
+                        roomDiv = document.createElement('div');
+                        roomDiv.id = roomId;
+                        roomDiv.classList.add('room');
+                        roomDiv.textContent = roomPositions[floor][index];
+                        roomDiv.addEventListener('click', () => toggleRoomStatus(roomPositions[floor][index]));
+                        roomsContainer.appendChild(roomDiv);
+                    }
 
-                    roomsContainer.appendChild(roomDiv);
+                    roomDiv.className = `room ${available === 0 ? 'available' : 'booked'}`;
                 });
             }
         })
         .catch(error => console.error('Error loading rooms:', error));
 }
 
-// This is basically used for changing the room status 
+let debounceTimer;
+
+function debounce(func, delay) {
+    return (...args) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func(...args), delay);
+    };
+}
+
+// This is used for changing the room status
 function toggleRoomStatus(roomNumber) {
-    
     fetch('/toggle_room', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room_number: roomNumber })
+        body: JSON.stringify({ room_number: roomNumber }),
     })
-
-
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            loadRooms(); 
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => console.error('Error changing room status:', error));
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                loadRooms();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch((error) => console.error('Error changing room status:', error));
 }
 
-window.onload = loadRooms;
+// Event listener with debounce applied
+function addRoomClickListener(roomDiv, roomNumber) {
+    roomDiv.addEventListener(
+        'click',
+        debounce(() => toggleRoomStatus(roomNumber), 300)
+    );
+}
+
+
 
 // This function basically updates the list which will tell which rooms are booked
 function updateBookedRoomsList(bookedRooms) {
